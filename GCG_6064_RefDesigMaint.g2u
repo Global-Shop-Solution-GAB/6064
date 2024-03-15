@@ -1,0 +1,300 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.f_RefDesigMaint..Create(BaseForm)
+Gui.f_RefDesigMaint..Caption("Reference Designator Maintenance")
+Gui.f_RefDesigMaint..Size(6960,10005)
+Gui.f_RefDesigMaint..MinX(0)
+Gui.f_RefDesigMaint..MinY(0)
+Gui.f_RefDesigMaint..Position(0,0)
+Gui.f_RefDesigMaint..BackColor(-2147483633)
+Gui.f_RefDesigMaint..MousePointer(0)
+Gui.f_RefDesigMaint..Event(UnLoad,f_RefDesigMaint_UnLoad)
+Gui.f_RefDesigMaint..MaxButton(False)
+Gui.f_RefDesigMaint..Sizeable(False)
+Gui.f_RefDesigMaint..AlwaysOnTop(False)
+Gui.f_RefDesigMaint..FontName("Tahoma")
+Gui.f_RefDesigMaint..FontSize(8.25)
+Gui.f_RefDesigMaint..ControlBox(True)
+Gui.f_RefDesigMaint..MinButton(True)
+Gui.f_RefDesigMaint..Moveable(True)
+Gui.f_RefDesigMaint..ShowInTaskBar(True)
+Gui.f_RefDesigMaint..TitleBar(True)
+Gui.f_RefDesigMaint.GsGcRefDesig.Create(GsGridControl)
+Gui.f_RefDesigMaint.GsGcRefDesig.Size(6960,10155)
+Gui.f_RefDesigMaint.GsGcRefDesig.Position(0,1395)
+Gui.f_RefDesigMaint.GsGcRefDesig.Anchor(14)
+Gui.f_RefDesigMaint.GsGcRefDesig.Enabled(True)
+Gui.f_RefDesigMaint.GsGcRefDesig.Visible(True)
+Gui.f_RefDesigMaint.GsGcRefDesig.Zorder(0)
+Gui.f_RefDesigMaint.GsGcRefDesig.Dock(0)
+Gui.f_RefDesigMaint.frame1.Create(Frame)
+Gui.f_RefDesigMaint.frame1.Size(6960,1365)
+Gui.f_RefDesigMaint.frame1.Position(0,0)
+Gui.f_RefDesigMaint.frame1.Enabled(True)
+Gui.f_RefDesigMaint.frame1.Visible(True)
+Gui.f_RefDesigMaint.frame1.Zorder(0)
+Gui.f_RefDesigMaint.frame1.Caption("Selected BOM")
+Gui.f_RefDesigMaint.frame1.FontName("Tahoma")
+Gui.f_RefDesigMaint.frame1.FontSize(8.25)
+Gui.f_RefDesigMaint.frame1.BorderStyle(1)
+Gui.f_RefDesigMaint.frame1.Dock(1)
+Gui.f_RefDesigMaint.txtBOM.Create(TextBox,"",True,3465,300,0,1470,465,False,0,"Arial",8,-2147483643,1)
+Gui.f_RefDesigMaint.txtBOM.Parent("frame1")
+Gui.f_RefDesigMaint.cmdExport.Create(Button)
+Gui.f_RefDesigMaint.cmdExport.Size(825,375)
+Gui.f_RefDesigMaint.cmdExport.Position(2865,870)
+Gui.f_RefDesigMaint.cmdExport.Anchor(9)
+Gui.f_RefDesigMaint.cmdExport.Caption("Export")
+Gui.f_RefDesigMaint.cmdExport.Event(Click,cmdExport_Click)
+Gui.f_RefDesigMaint.cmdExport.Parent("frame1")
+Gui.f_RefDesigMaint.cmdExport.Enabled(True)
+Gui.f_RefDesigMaint.cmdExport.Visible(True)
+Gui.f_RefDesigMaint.cmdExport.Zorder(0)
+Gui.f_RefDesigMaint.cmdExport.FontName("Tahoma")
+Gui.f_RefDesigMaint.cmdExport.FontSize(8.25)
+Gui.f_RefDesigMaint.cmdBrowse.Create(Button)
+Gui.f_RefDesigMaint.cmdBrowse.Size(435,375)
+Gui.f_RefDesigMaint.cmdBrowse.Position(4980,435)
+Gui.f_RefDesigMaint.cmdBrowse.Parent("frame1")
+Gui.f_RefDesigMaint.cmdBrowse.Caption("^")
+Gui.f_RefDesigMaint.cmdBrowse.Event(Click,cmdBrowse_Click)
+Gui.f_RefDesigMaint.cmdBrowse.Enabled(True)
+Gui.f_RefDesigMaint.cmdBrowse.Visible(True)
+Gui.f_RefDesigMaint.cmdBrowse.Zorder(0)
+Gui.f_RefDesigMaint.cmdBrowse.FontName("Tahoma")
+Gui.f_RefDesigMaint.cmdBrowse.FontSize(8.25)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+	v.Global.bFormLoaded.Declare(boolean,False)
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+	v.Local.sGSSPart.Declare(String)
+	F.Intrinsic.Control.If(V.Caller.Hook,=,16300)
+		'Set Script 1 text
+		v.Passed.000214.Set("Ref Des Maint")
+	F.Intrinsic.Control.Elseif(v.Caller.Hook,=,16360)
+		'Open Reference Designator Maintenance
+		
+		f.Intrinsic.Control.If(v.Passed.000001,=,"")
+			f.Intrinsic.UI.Msgbox("Please select a BOM","Error")
+			f.Intrinsic.Control.End
+		f.Intrinsic.Control.EndIf
+		
+		'Hide the browser if called from core screen
+		gui.f_RefDesigMaint.cmdBrowse.Visible(False)
+		
+		'Build the BOM part
+		f.Intrinsic.String.GSSPartString(v.Passed.000001,v.Passed.000093,v.Local.sGSSPart)
+		'Get parent BOM to display to user
+		gui.f_RefDesigMaint.txtBOM.Text(v.Local.sGSSPart)
+		f.Intrinsic.Control.CallSub(GetData)
+		f.Intrinsic.Control.CallSub(FormatGrid)
+		
+		'Set the icon
+		F.Intrinsic.Control.CallSub(LoadPictureLogo)
+		'Show form as modal dialog
+		gui.f_RefDesigMaint..Show
+		gui.f_RefDesigMaint..WaitForDismiss
+	f.Intrinsic.Control.Else
+		gui.f_RefDesigMaint..Show
+	F.Intrinsic.Control.EndIf
+Program.Sub.Main.End
+
+Program.Sub.f_RefDesigMaint_UnLoad.Start
+	f.Intrinsic.Control.End
+Program.Sub.f_RefDesigMaint_UnLoad.End
+
+Program.Sub.GetData.Start
+	v.Local.sSQL.Declare(string)
+	v.Local.sSQL2.Declare(string)
+	v.Local.sRet.Declare(String)
+	v.Local.iCnt.Declare(Long,0)
+	v.Local.iCnt2.Declare(Long,0)
+	f.Intrinsic.Control.Try
+		f.Intrinsic.String.Build("select a.part, b.text from v_bom_mstr a inner join v_bom_notes b on a.parent=b.parent and a.sequence_bom=b.parent_seq where a.parent='{0}' and b.text<>'';",v.Screen.f_RefDesigMaint!txtBOM.text,v.Local.sSQL)
+		'f.Intrinsic.String.Build("select ID, parent_bom, RTRIM(LTRIM(part)) AS PART, RTRIM(LTRIM(ref_desig)) AS REF_DESIG, SEQ_BOM, 0 as RefDesCount from gcg_5786_refdesig where parent_bom='{0}' order by SEQ_BOM, ref_desig;",v.Screen.f_RefDesigMaint!txtBOM.text,v.Local.sSQL)
+		'f.Intrinsic.String.Build("select RTRIM(LTRIM(ref_desig)) AS REF_DESIG, count(*) as RefDesCount from gcg_5786_refdesig where parent_bom = '{0}' group by part, ref_desig having count(*)>1;",v.Screen.f_RefDesigMaint!txtBOM.text,v.Local.sSQL2)
+		f.ODBC.Connection!con.opencompanyconnection
+			f.Data.DataTable.CreateFromSQL("dtRefDesTemp","con",v.Local.sSQL)
+			
+			f.Intrinsic.Control.If(v.DataTable.dtRefDes.Exists,=,False)
+				f.Data.DataTable.Create("dtRefDes",True)
+				f.Data.DataTable.AddColumn("dtRefDes","Part","string")
+				f.Data.DataTable.AddColumn("dtRefDes","Ref_Desig","string")
+				f.Data.DataTable.AddColumn("dtRefDes","RefDesCount","long",0)
+				f.Data.Dataview.Create("dtRefDes","dvRefDes")
+			f.Intrinsic.Control.Else
+				f.Data.DataTable.DeleteRow("dtRefDes")
+				f.Data.DataTable.acceptchanges("dtRefDes")
+			f.Intrinsic.Control.EndIf
+				
+			'Parse the reference designators to separate them
+			f.Intrinsic.Control.For(v.Local.iCnt,0,v.DataTable.dtRefDesTemp.RowCount--,1)
+				v.Local.sRet.Redim(0,0)
+				f.Intrinsic.String.Replace(v.DataTable.dtRefDesTemp(v.local.iCnt).Text!FieldValtrim," ","",v.Local.sRet)
+				f.Intrinsic.String.Split(v.Local.sRet,",",v.Local.sRet)
+				
+				'Add each individual reference designator to the master datatable
+				f.Intrinsic.Control.For(v.Local.iCnt2,0,v.Local.sRet.UBound,1)
+					f.Data.DataTable.AddRow("dtRefDes","Part",v.DataTable.dtRefDesTemp(v.Local.iCnt).Part!FieldVal,"Ref_Desig",v.Local.sRet(v.Local.iCnt2))
+				f.Intrinsic.Control.Next(v.Local.iCnt2)
+			f.Intrinsic.Control.Next(v.Local.iCnt)
+				
+			f.Data.DataTable.Close("dtRefDesTemp")
+		f.ODBC.Connection!con.close
+		
+		f.Intrinsic.Control.CallSub("CheckRD")
+	f.Intrinsic.Control.Catch
+		f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+	f.Intrinsic.Control.EndTry
+Program.Sub.GetData.End
+
+Program.Sub.ErrorMsg.Start
+v.Local.sError.Declare
+
+'Closes ODBC connection, default to connection : "con"
+f.Intrinsic.Control.If(v.ODBC!con.State, =, 1)
+	f.ODBC.Connection!con.Close
+f.Intrinsic.Control.EndIf
+
+'Generic Error message.
+f.Intrinsic.String.Build("Project GCG_6067_RefDesigMaint.g2u {0}{0}Subroutine: {1}{0}Error: {2} with Description: {3}", v.Ambient.NewLine, v.Args.CurrentSub, v.Ambient.ErrorNumber, v.Ambient.ErrorDescription, v.Local.sError)
+f.Intrinsic.UI.Msgbox(v.Local.sError)
+Program.Sub.ErrorMsg.End
+
+Program.Sub.loadPictureLogo.Start
+f.Intrinsic.Control.Try
+
+	'Load the Logo at the top of dash and the Icon
+	v.Local.sIcon.Declare(String)
+	v.Local.sGssLogo.Declare(String)
+	
+	f.Intrinsic.String.Build("{0}\ART\gss2.ico", v.Caller.GlobalDir, v.Local.sIcon)
+	gui.f_RefDesigMaint..Icon(v.Local.sIcon)
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+f.Intrinsic.Control.EndTry
+Program.Sub.loadPictureLogo.End
+
+Program.Sub.FormatGrid.Start
+	f.Intrinsic.Control.Try
+		gui.f_RefDesigMaint.GsGcRefDesig.AddGridviewFromDatatable("gvRefDes","dtRefDes")
+		
+		gui.f_RefDesigMaint.GsGcRefDesig.SetGridviewProperty("gvRefDes","OptionsViewColumnAutoWidth",TRUE)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetGridViewProperty("gvRefDes","MultiSelect",True)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetGridViewProperty("gvRefDes","AllowSort",True)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetGridViewProperty("gvRefDes","AllowFilter",True)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetGridViewProperty("gvRefDes","OptionsDetailShowDetailTabs",FALSE)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetGridViewProperty("gvRefDes","OptionsViewShowGroupPanel",fALSE)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetGridViewProperty("gvRefDes","EnableAppearanceOddRow",True)
+		gui.f_RefDesigMaint.GsGcRefDesig.SetGridviewProperty("gvRefDes","OptionsFindAlwaysVisible",True)
+		
+		gui.f_RefDesigMaint.GsGcRefDesig.SetGridviewProperty("gvRefDes","OptionsViewShowAutoFilterRow",True)
+	
+		'Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","ID","Visible",False)
+		'Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","SEQ_BOM","Visible",False)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","RefDesCount","Visible",False)
+	
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","Caption","Part ")
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","MinWidth","120")
+		gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","HeaderFontBold", True)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","HeaderHAlignment","Center")
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","CellHAlignment","Center")
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","ReadOnly",True)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","AllowEdit",False)
+		gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","HeaderBackColor", v.Color.GSS)
+		gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","PART","HeaderForeColor", v.Color.White)
+		
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","Caption","Ref Designator ")
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","MinWidth","120")
+		gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","HeaderFontBold", True)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","HeaderHAlignment","Center")
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","CellHAlignment","Center")
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","ReadOnly",FALSE)
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","AllowEdit",True)
+		gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","HeaderBackColor", v.Color.GSS)
+		gui.f_RefDesigMaint.GsGcRefDesig.SetColumnProperty("gvRefDes","REF_DESIG","HeaderForeColor", v.Color.White)
+		
+		gui.f_RefDesigMaint.GsGcRefDesig.addstyleformatcondition("gvRefDes","RefDesCount","RefDesDuplicates","Greater",1)
+		gui.f_RefDesigMaint.GsGcRefDesig.SetStyleFormatConditionProperty("gvRefDes","RefDesCount","RefDesDuplicates","backcolor","red")
+		Gui.f_RefDesigMaint.GsGcRefDesig.SetStyleFormatConditionProperty("gvRefDes","RefDesCount","RefDesDuplicates","ApplyToRow",True)
+		
+		gui.f_RefDesigMaint.GsGcRefDesig.MainView("gvRefDes")
+		v.Global.bFormLoaded.Set(True)
+	f.Intrinsic.Control.Catch
+		f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+	f.Intrinsic.Control.EndTry
+Program.Sub.FormatGrid.End
+
+Program.Sub.cmdBrowse_Click.Start
+	v.Local.sBOM.Declare(string)
+	'BOM browser in case form is launched from custom menu option
+	f.Intrinsic.UI.CommonBrowser(3000,"",v.Local.sBOM)
+	f.Intrinsic.Control.If(v.Local.sBOM,!=,"***CANCEL***")
+		f.Intrinsic.String.Split(v.Local.sBOM,"*!*",v.Local.sBOM)
+		gui.f_RefDesigMaint.txtBOM.Text(v.Local.sBOM(0))
+		f.Intrinsic.Control.CallSub(GetData)
+		f.Intrinsic.Control.If(v.Global.bFormLoaded,=,False)
+			f.Intrinsic.Control.CallSub(FormatGrid)
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.EndIf
+Program.Sub.cmdBrowse_Click.End
+Program.Sub.cmdExport_Click.Start
+	v.Local.bExcel.Declare(boolean,False)
+	v.Local.sFilePath.Declare(string)
+	v.Local.bExists.Declare(Boolean)
+	v.Local.sFileExt.Declare(String,"xlsx")
+	
+	f.Intrinsic.Control.Try
+		'Check Excel is installed.  If not, exit.
+		f.Automation.MSExcel.CheckPresence(v.Local.bExcel)
+		f.Intrinsic.Control.If(v.Local.bExcel,=,False)
+			v.Local.sFileExt.set("csv")
+		f.Intrinsic.Control.EndIf
+		
+		'Prompt for save location
+		f.Intrinsic.String.Build("{0}\{1}_BOM_Export.{2}",v.Caller.LocalGSSTempDir,v.Screen.f_RefDesigMaint!txtBOM.Text,v.Local.sFileExt,v.Local.sFilePath)
+		
+		'Delete the file if it exists
+		f.Intrinsic.File.Exists(v.Local.sFilePath,v.Local.bExists)
+		f.Intrinsic.Control.If(v.Local.bExists)
+			f.Intrinsic.File.DeleteFile(v.Local.sFilePath)
+		f.Intrinsic.Control.EndIf
+
+		gui.f_RefDesigMaint.GsGcRefDesig.Export(v.Local.sFilePath,v.Local.sFileExt)
+
+		'Open file
+		F.Intrinsic.Task.ShellExec(0,"",v.Local.sFilePath,"","",1)
+	f.Intrinsic.Control.Catch
+		f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+	f.Intrinsic.Control.EndTry
+Program.Sub.cmdExport_Click.End
+
+Program.Sub.CheckRD.Start
+	'No reference designator should be duplicated across all parts on the BOM
+	v.Local.iCnt.Declare(long)
+	v.Local.sFilter.Declare(String)
+	v.Local.iCalc.Declare(Long)
+	f.Intrinsic.Control.Try
+		f.Data.Dictionary.Create("dictRefDesCnt")
+		f.Data.DataView.ToDataTableDistinct("dtRefDes","dvRefDes","dtRefDesDistinct","Ref_Desig")
+		f.Intrinsic.Control.For(v.Local.iCnt,0,v.DataTable.dtRefDesDistinct.RowCount--,1)
+			f.Intrinsic.String.Build("Ref_Desig='{0}'",v.DataTable.dtRefDesDistinct(v.Local.iCnt).Ref_Desig!FieldVal,v.Local.sFilter)
+			f.Data.DataTable.Compute("dtRefDes","Count(Ref_Desig)",v.Local.sFilter,v.Local.iCalc)
+			f.Data.Dictionary.AddItem("dictRefDesCnt",v.DataTable.dtRefDesDistinct(v.Local.iCnt).Ref_Desig!FieldVal,v.Local.iCalc)
+		f.Intrinsic.Control.Next(v.Local.iCnt)
+		
+		f.Data.Dictionary.SetDefaultReturn("dictRefDesCnt",1)
+		f.Data.DataTable.FillFromDictionary("dtRefDes","dictRefDesCnt","Ref_Desig","RefDesCount")
+		f.Data.Dictionary.Close("dictRefDesCnt")
+		f.Data.DataTable.Close("dtRefDesDistinct")
+	f.Intrinsic.Control.Catch
+		f.Intrinsic.Control.CallSub(ErrorMsg, CurrentSub, v.Ambient.CurrentSubroutine)
+	f.Intrinsic.Control.EndTry
+Program.Sub.CheckRD.End
+
+Program.Sub.Comments.Start
+${$5$}$3.0.0.0$}$1
+${$6$}$dduncan$}$20200821020658690$}$r0o+00bj735YsiGsQ60YIo/Zb+26OZQGrk0qnnQaLb7qfpTeouUwFV6yleOIhKE7dgrZlqUOPqw=
+Program.Sub.Comments.End
